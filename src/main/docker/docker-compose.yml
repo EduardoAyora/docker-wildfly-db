@@ -1,0 +1,31 @@
+version: '3.6'
+
+services:
+  wildfly:
+    image: helloworld-mp
+    hostname: wildfly
+    ports:
+      - 8080:8080
+      - 9990:9990
+
+  swaggerui:
+    depends_on:
+      - wildfly
+    image: swaggerapi/swagger-ui
+    ports:
+      - 8888:8080
+
+  swaggereditor:
+    depends_on:
+      - wildfly
+    image: swaggerapi/swagger-editor
+    ports:
+      - 9999:8080
+
+  jaegertracingio:
+    depends_on:
+      - wildfly
+    image: jaegertracing/all-in-one:1.16.0
+    ports:
+      - 6831:6831/udp
+      - 16686:16686
