@@ -1,12 +1,32 @@
 version: '3.6'
 
 services:
+  srvdb:
+    image: postgres
+    container_name: srvdb
+    hostname: srvdb
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_DB: admin
+      POSTGRES_PASSWORD: admin
+      TZ:  America/Guayaquil
+    ports:
+      - 5432:5432
+    volumes:
+      - ./pg_data:/var/lib/postgresql/data
+    networks:
+      - datalogger_net
+
   wildfly:
+    depends_on:
+      - srvdb
     image: helloworld-mp
     hostname: wildfly
     ports:
       - 8080:8080
       - 9990:9990
+    networks:
+      - datalogger_net
 
   swaggerui:
     depends_on:
@@ -14,6 +34,8 @@ services:
     image: swaggerapi/swagger-ui
     ports:
       - 8888:8080
+    networks:
+      - datalogger_net
 
   swaggereditor:
     depends_on:
@@ -21,6 +43,8 @@ services:
     image: swaggerapi/swagger-editor
     ports:
       - 9999:8080
+    networks:
+      - datalogger_net
 
   jaegertracingio:
     depends_on:
@@ -29,3 +53,21 @@ services:
     ports:
       - 6831:6831/udp
       - 16686:16686
+    networks:
+      - datalogger_net
+  
+  admin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@mail.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      TZ:  America/Guayaquil
+    ports:
+      - 5050:80
+    depends_on:
+      - srvdb
+    networks:
+      - datalogger_net
+
+networks:
+  datalogger_net:
