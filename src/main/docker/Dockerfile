@@ -1,4 +1,5 @@
 FROM jboss/wildfly:20.0.1.Final
+#FROM jboss/wildfly
 
 ENV WILDFLY_USER user
 ENV WILDFLY_PASS userPassword
@@ -6,20 +7,24 @@ ENV DS_NAME admin
 ENV DS_USER admin
 ENV DS_PASS admin
 ENV DS_URI jdbc:postgresql://srvdb/admin
+#ENV JBOSS_CLI jboss-cli.sh
 ENV JBOSS_CLI $JBOSS_HOME/bin/jboss-cli.sh
+#ENV JBOSS_CLI $JBOSS_HOME/bin/jboss-cli.sh --controller=host.docker.internal:9990
 ENV DEPLOYMENT_DIR $JBOSS_HOME/standalone/deployments/
 RUN echo "Adding WildFly administrator"
 RUN $JBOSS_HOME/bin/add-user.sh -u $WILDFLY_USER -p $WILDFLY_PASS --silent
 
 
-COPY standalone-microprofile-jaeger.xml /opt/jboss/wildfly/standalone/configuration/
+COPY standalone.xml /opt/jboss/wildfly/standalone/configuration/
+
+#RUN sleep 5
 
 RUN echo "Starting WildFly server" && \
-      # bash -c '$JBOSS_HOME/bin/standalone.sh -c standalone.xml &' && \
+      bash -c '$JBOSS_HOME/bin/standalone.sh -c standalone.xml &' && \
       bash -c 'until `$JBOSS_CLI -c ":read-attribute(name=server-state)" 2> /dev/null | grep -q running`; do echo `$JBOSS_CLI -c ":read-attribute(name=server-state)" 2> /dev/null`; sleep 1; done' && \
       curl --location --output /tmp/postgresql-42.2.16.jar --url https://jdbc.postgresql.org/download/postgresql-42.2.16.jar && \
-      $JBOSS_CLI --connect --command="/extension=org.wildfly.extension.microprofile.openapi-smallrye:add" && \
-      $JBOSS_CLI --connect --command="/subsystem=microprofile-openapi-smallrye:add" && \
+      #$JBOSS_CLI --connect --command="/extension=org.wildfly.extension.microprofile.openapi-smallrye:add" && \
+      #$JBOSS_CLI --connect --command="/subsystem=microprofile-openapi-smallrye:add" && \
       $JBOSS_CLI --connect --command="/subsystem=undertow/server=default-server/ajp-listener=ajp-listener:add(socket-binding=ajp, scheme=https, enabled=true)" && \
       $JBOSS_CLI --connect --command="/subsystem=undertow:write-attribute(name=statistics-enabled,value=true)" && \
       $JBOSS_CLI --connect --command="module add --name=org.postgres --resources=/tmp/postgresql-42.2.16.jar --dependencies=javax.api,javax.transaction.api" && \
@@ -36,6 +41,7 @@ RUN echo "Starting WildFly server" && \
         --blocking-timeout-wait-millis=5000 \
         --statistics-enabled=true \
         --enabled=true" && \
+	  #$JBOSS_CLI --connect --command="/subsystem=datasources/data- source=ExampleDS:remove()" && \
       $JBOSS_CLI --connect --command=":shutdown" && \
       rm -rf $JBOSS_HOME/standalone/configuration/standalone_xml_history/ $JBOSS_HOME/standalone/log/* && \
       rm -f /tmp/*.jar
@@ -44,4 +50,4 @@ COPY maven/helloworld-mp.war /opt/jboss/wildfly/standalone/deployments/
 EXPOSE 8080
 EXPOSE 8009
 EXPOSE 9990
-CMD ["/opt/jboss/wildfly/bin/standalone.sh", "-c", "standalone-microprofile-jaeger.xml", "-b", "0.0.0.0", "-bmanagement", "0.0.0.0"]
+CMD ["/opt/jboss/wildfly/bin/standalone.sh", "-c", "standalone.xml", "-b", "0.0.0.0", "-bmanagement", "0.0.0.0"]
