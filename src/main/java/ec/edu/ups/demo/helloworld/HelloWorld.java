@@ -27,6 +27,7 @@ public class HelloWorld {
 	@Inject
 	HelloService helloService;
 
+	/**
 	@GET
 	@Path("/json")
 	@Traced(operationName = "hello-json")
@@ -85,6 +86,6 @@ public class HelloWorld {
 		Client client = ClientBuilder.newClient();
 		String response = client.target("http://localhost:8080/helloworld-mp/rest/json").request().get(String.class);
 		return response;
-	}
+	}**/
 
 }

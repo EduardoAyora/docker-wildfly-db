@@ -32,77 +32,20 @@ import ec.edu.ups.demo.helloworld.bussines.PersonaON;
 import ec.edu.ups.demo.helloworld.model.Persona;
 
 @Path("/personas")
-public class LoginApi {
+public class PersonaApi {
 	
 	@Inject
 	private PersonaON personaOn;
-	
 	@Inject
 	Logger log;
 	
-	@POST
-	@Path("/login")
-	@Traced(false)
-	@Counted(description = "Contador login", absolute = true)
-	@Timed(name = "login-time", description = "Tiempo de procesamiento de login", unit = MetricUnits.MILLISECONDS, absolute = true)
-	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	@Produces({ MediaType.APPLICATION_JSON })
-	@Operation(description = "Ingreso al sistema", summary = "Login sistema")
-	@APIResponses(value={
-	@APIResponse(responseCode = "200", description = "Acceso correcto",
-	             content = @Content(mediaType = MediaType.APPLICATION_JSON ,
-	                                schema = @Schema(implementation = String.class))),
-	@APIResponse(responseCode = "403", description = "Acceso denegado")}
-	)
-	public Response login(
-			@FormParam("usuario") String usuario,
-			@FormParam("clave") String clave
-			) {
-		JsonObject resp = Json.createObjectBuilder().add("login", usuario).build();
-		if (clave.equals("admin"))
-			return Response.ok(resp).build();
-		else
-			return Response.status(Response.Status.FORBIDDEN)
-					.entity(resp)
-					.build();
-	}
-	
-	@GET
-	@Path("/unlock/{cuenta}")
-	@Traced(operationName = "unlock-operation")
-	@Counted(description = "Contador unlock", absolute = true)
-	@Timed(name = "unlock-time", description = "Tiempo de procesamiento de unlock", unit = MetricUnits.MILLISECONDS, absolute = true)
-	@Produces({ MediaType.APPLICATION_JSON })
-	@Operation(description = "Desblquear la cuenta de un usuario", summary = "Desbloquear cuenta")
-	@APIResponses(value={
-	@APIResponse(responseCode = "200", description = "Cuenta desbloqueada",
-	             content = @Content(mediaType = MediaType.APPLICATION_JSON ,
-	                                schema = @Schema(implementation = String.class))),
-	@APIResponse(responseCode = "400", description = "Cuenta no existe")}
-	)
-	public Response unlock(
-			@Parameter(description = "Cuenta de usuario", required = true)
-			@PathParam("cuenta") String cuenta) {
-		try {
-			log.info("Se genera un tiempo de espera aleatorio");
-			Thread.sleep((long)(Math.random() * 1000));
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		JsonObject resp = Json.createObjectBuilder().add("account", cuenta).build();
-		if (cuenta.equals("admin"))
-			return Response.status(Response.Status.NOT_FOUND)
-					.entity(resp)
-					.build();
-		else
-			return Response.ok(resp).build();
-	}
 	
 	@POST
 	@Path("/")
 	@Traced(operationName = "crear-persona")
 	@Counted(description = "Contador unlock", absolute = true)
 	@Timed(name = "crear-persona-time", description = "Tiempo de procesamiento de unlock", unit = MetricUnits.MILLISECONDS, absolute = true)
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces({ MediaType.APPLICATION_JSON })
 	@Operation(description = "Crear una persona", summary = "Crear una persona")
 	@APIResponses(value={
