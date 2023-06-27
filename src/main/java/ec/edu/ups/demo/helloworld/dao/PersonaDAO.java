@@ -5,10 +5,13 @@ package ec.edu.ups.demo.helloworld.dao;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.transaction.Transactional;
+import javax.transaction.UserTransaction;
 
 import ec.edu.ups.demo.helloworld.model.Persona;
 
@@ -18,10 +21,12 @@ public class PersonaDAO {
 	@PersistenceContext
 	private EntityManager em;
 	
+	@Transactional
 	public void insert(Persona op) {
 		em.persist(op);
 	}
 	
+	@Transactional
 	public List<Persona> getList(){
 		List<Persona> listado = new ArrayList<Persona>();
 		

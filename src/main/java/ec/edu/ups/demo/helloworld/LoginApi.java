@@ -120,7 +120,6 @@ public class LoginApi {
 			) {
 		try {
 			log.info("Se genera un tiempo de espera aleatorio");
-			Thread.sleep((long)(Math.random() * 1000));
 			
 			Persona persona = new Persona();
 			persona.setCedula(cedula);
@@ -132,9 +131,11 @@ public class LoginApi {
 			
 		} catch (Exception e) {
 			e.printStackTrace();
+			JsonObject resp = Json.createObjectBuilder().add("error", "Error, revise que la cédula no esté repetida").build();
+			return Response.status(Response.Status.BAD_REQUEST).entity(resp).build();
 		}
 		
-		JsonObject resp = Json.createObjectBuilder().add("account", "Éxito").build();
+		JsonObject resp = Json.createObjectBuilder().add("estado", "Ok").build();
 		return Response.ok(resp).build();
 		
 	}
